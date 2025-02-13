@@ -23,7 +23,7 @@ jobs:
       - name: Deploy Application
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd /path/to/your/app
+            cd /fastapi_app
             git pull origin main
             docker compose down
             docker compose up -d --build
