@@ -1,24 +1,33 @@
 name: CD Pipeline
-on: [push, pull_request]
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up SSH
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H your.server.com >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
       - name: Install Docker
         run: |
           sudo apt-get update
           sudo apt-get install -y docker.io
-      - name: Deploy application
+
+      - name: Deploy Application
         run: |
-          ssh user@your.server.com << 'EOF'
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
             cd fastapi-book-project
             git pull origin main
             docker compose down
