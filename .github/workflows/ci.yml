@@ -29,6 +29,3 @@ jobs:
           source venv/bin/activate
           pytest
 
-      - name: Fail if tests fail
-        if: failure()
-        run: exit 1
