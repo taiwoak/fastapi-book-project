@@ -3,11 +3,10 @@ name: CD Pipeline
 on:
   push:
     branches:
-      - main
+      - mai
 
 jobs:
   deploy:
-    name: Deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -17,17 +16,6 @@ jobs:
       - name: Set up Docker
         run: |
           sudo apt update
-          sudo apt install -y \
-            apt-transport-https \
-            ca-certificates \
-            curl \
-            gnupg \
-            lsb-release
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-            $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-          sudo apt update
           sudo apt install -y docker-ce docker-ce-cli containerd.io
 
       - name: Log in to Docker Hub
@@ -35,16 +23,16 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t taiwoak/fastapi_app .
-          docker push taiwoak/fastapi_app
+          docker build -t taiwoak/fastapi-app .
+          docker push taiwoak/fastapi-app
 
       - name: Deploy to server
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            docker pull taiwoak/fastapi_app:latest
-            docker stop fastapi_app || true
-            docker rm fastapi_app || true
-            docker run -d -p 8000:8000 --name fastapi_app taiwoak/fastapi_app:latest
+            docker pull taiwoak/fastapi-app:latest
+            docker stop fastapi-app || true
+            docker rm fastapi-app || true
+            docker run -d -p 8000:8000 --name fastapi-app taiwoak/fastapi-app:latest
           EOF
           rm -f private_key
