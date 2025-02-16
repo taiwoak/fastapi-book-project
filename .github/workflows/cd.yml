@@ -6,25 +6,30 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Docker
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Start Docker service
+        run: sudo service docker start
+
+      - name: Install Docker plugins
         run: |
-          sudo apt update
-          sudo apt install -y docker-ce docker-ce-cli containerd.io
+          sudo apt-get update
+          sudo apt-get install -y moby-buildx moby-compose
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build and push Docker image
         run: |
-          docker build -t taiwoak/fastapi-app .
-          docker push taiwoak/fastapi-app
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/fastapi-app .
+          docker push ${{ secrets.DOCKER_USERNAME }}/fastapi-app
 
       - name: Deploy to server
         run: |
@@ -36,3 +41,11 @@ jobs:
             docker run -d -p 8000:8000 --name fastapi-app taiwoak/fastapi-app:latest
           EOF
           rm -f private_key
+
+      - name: Ensure Docker service is running before cleanup
+        run: sudo service docker start
+
+      - name: Cleanup
+        run: |
+          docker buildx rm builder-c71ef7f5-1ef6-4d1a-9054-f1ac96d1b3cc
+          sudo service docker stop
