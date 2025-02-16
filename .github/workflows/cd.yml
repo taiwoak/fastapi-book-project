@@ -41,3 +41,11 @@ jobs:
           docker run -d -p 8000:8000 --name fastapi-app taiwoak/fastapi-app:latest
         EOF
         rm -f private_key
+
+    - name: Ensure Docker service is running before cleanup
+      run: sudo service docker start
+
+    - name: Cleanup
+      run: |
+        docker buildx rm builder-00ecf762-8922-40f0-be1c-a4a1e274b032
+        sudo service docker stop
