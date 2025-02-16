@@ -33,11 +33,11 @@ jobs:
 
     - name: Deploy to server
       run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            docker pull taiwoak/fastapi-app:latest
-            docker stop fastapi-app || true
-            docker rm fastapi-app || true
-            docker run -d -p 8000:8000 --name fastapi-app taiwoak/fastapi-app:latest
-          EOF
-          rm -f private_key
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
+        ssh -o StrictHostKeyChecking=no -i private_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          docker pull taiwoak/fastapi-app:latest
+          docker stop fastapi-app || true
+          docker rm fastapi-app || true
+          docker run -d -p 8000:8000 --name fastapi-app taiwoak/fastapi-app:latest
+        EOF
+        rm -f private_key
